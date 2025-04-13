@@ -50,13 +50,12 @@
           inherit cargoArtifacts;
         });
 
-        # Add Docker image configuration
         dockerImage = pkgs.dockerTools.streamLayeredImage {
           name = "sm-turtle-game";
           tag = "latest";
           contents = [ bin ];
           config = {
-            Cmd = [ "${bin}/bin/sm-turtle-game" ]; # Adjust binary name as needed
+            Cmd = [ "${bin}/bin/sm-turtle-game" ];
           };
         };
     in
