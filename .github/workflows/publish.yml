@@ -1,0 +1,72 @@
+name: Build and Publish Docker Image
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Install Nix
+        uses: cachix/install-nix-action@v20
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+      
+      - name: Generate CalVer version
+        id: calver
+        run: echo "VERSION=$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      
+      - name: Build Docker image with Nix
+        run: |
+          nix build .#dockerImage
+          
+      - name: Load Docker image
+        run: |
+          docker load < result
+      
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v4
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=raw,value=${{ steps.calver.outputs.VERSION }}
+      
+      - name: Tag and push Docker image
+        run: |
+          # Get the current image ID
+          IMAGE_ID=$(docker images --format "{{.ID}}" sm-turtle-game:latest)
+          
+          # Tag with metadata tags
+          for tag in ${{ steps.meta.outputs.tags }}; do
+            echo "Tagging with: $tag"
+            docker tag $IMAGE_ID $tag
+          done
+          
+          # Push all tags
+          docker push --all-tags ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          
+      - name: Image digest
+        run: echo "Published image: ${{ steps.meta.outputs.tags }}"

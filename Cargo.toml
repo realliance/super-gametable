@@ -1,0 +1,7 @@
+[package]
+name = "sm-turtle-game"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+libmahjong-rs = { git = "https://github.com/realliance/libmahjong-rs.git" }
