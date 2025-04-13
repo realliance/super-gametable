@@ -69,4 +69,5 @@ jobs:
           docker push --all-tags ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           
       - name: Image digest
-        run: echo "Published image: ${{ steps.meta.outputs.tags }}"
+        run: |
+          echo "Published image: ${{ steps.meta.outputs.tags }}"
