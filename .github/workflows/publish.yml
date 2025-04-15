@@ -57,7 +57,7 @@ jobs:
       - name: Tag and push Docker image
         run: |
           # Get the current image ID
-          IMAGE_ID=$(docker images --format "{{.ID}}" sm-turtle-game:latest)
+          IMAGE_ID=$(docker images --format "{{.ID}}" ${{ env.IMAGE_NAME }}:latest)
           
           # Tag with metadata tags
           echo "${{ steps.meta.outputs.tags }}" | while read -r tag; do

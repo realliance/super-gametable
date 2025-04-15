@@ -1,7 +1,34 @@
+[workspace]
+members = ["crates/*"]
+
 [package]
-name = "sm-turtle-game"
+name = "super-gametable"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+super-gametable-enrollment = { path = "crates/super-gametable-enrollment" }
+
+envy = "0.4"
+clap = { version = "4", features = ["derive"] }
+anyhow = { workspace = true }
+tokio = { workspace = true }
+axum = { workspace = true }
+axum-extra = { workspace = true }
+
+[workspace.dependencies]
 libmahjong-rs = { git = "https://github.com/realliance/libmahjong-rs.git" }
+axum = { version = "0.8", features = ["json"] }
+axum-extra = { version = "0.10", features = ["typed-header"] }
+tokio = { version = "1", features = ["full"] }
+anyhow = "1"
+tokio-stream = "0.1"
+tower-http = { version = "0.6.1", features = ["fs", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+futures = "0.3"
+headers = "0.4"
+http = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+async-trait = "0.1"

@@ -1,5 +1,5 @@
 {
-  description = "Small Turtle Game Server";
+  description = "Super Gametable";
 
   inputs = {
     nixpkgs.url = "nixpkgs";
@@ -51,11 +51,11 @@
         });
 
         dockerImage = pkgs.dockerTools.streamLayeredImage {
-          name = "sm-turtle-game";
+          name = "super-gametable";
           tag = "latest";
           contents = [ bin ];
           config = {
-            Cmd = [ "${bin}/bin/sm-turtle-game" ];
+            Cmd = [ "${bin}/bin/super-gametable" ];
           };
         };
     in
