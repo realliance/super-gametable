@@ -1,23 +1,30 @@
-[workspace]
-members = ["crates/*"]
-
 [package]
 name = "super-gametable"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-super-gametable-enrollment = { path = "crates/super-gametable-enrollment" }
-
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 envy = "0.4"
 clap = { version = "4", features = ["derive"] }
 anyhow = { workspace = true }
 tokio = { workspace = true }
 axum = { workspace = true }
 axum-extra = { workspace = true }
+libmahjong-rs = { workspace = true }
+libmahjong-specs = { workspace = true }
+rand = { workspace = true }
+lapin = "2.0"
+chrono = { version = "0.4", features = ["serde"] }
+capnp = "0.20"
+futures-lite = "2.0"
 
 [workspace.dependencies]
 libmahjong-rs = { git = "https://github.com/realliance/libmahjong-rs.git" }
+libmahjong-specs = { git = "https://github.com/realliance/libmahjong-specs.git", branch = "dist/rust" }
 axum = { version = "0.8", features = ["json"] }
 axum-extra = { version = "0.10", features = ["typed-header"] }
 tokio = { version = "1", features = ["full"] }
@@ -32,3 +39,9 @@ http = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 async-trait = "0.1"
+rand = "0.8"
+
+[profile.release]
+lto = true
+opt-level = 2
+strip = true

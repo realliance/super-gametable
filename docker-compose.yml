@@ -1,0 +1,54 @@
+services:
+  # RabbitMQ message broker
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    hostname: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: gametable_user
+      RABBITMQ_DEFAULT_PASS: gametable_pass
+      RABBITMQ_DEFAULT_VHOST: gametable
+    ports:
+      - "5672:5672"      # AMQP port
+      - "15672:15672"    # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - super-gametable-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+  # Super Gametable Service
+  super-gametable:
+    image: super-gametable:latest
+    environment:
+      # AMQP Configuration
+      QUEUE_CLUSTER_URL: "amqp://gametable_user:gametable_pass@rabbitmq:5672/gametable"
+      INCOMING_QUEUE_NAME: "game-starting"
+
+      # Logging
+      RUST_LOG: "info,super-gametable=debug"
+      RUST_BACKTRACE: "1"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - super-gametable-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/super-gametable", "--health-check"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  rabbitmq_data:
+    driver: local
+
+networks:
+  super-gametable-network:
+    driver: bridge 

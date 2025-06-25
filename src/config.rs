@@ -5,13 +5,8 @@ use serde::Deserialize;
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct Config {
-    /// Listening port
-    #[serde(default = "default_port")]
-    pub port: u16,
-}
-
-fn default_port() -> u16 {
-    8080
+    pub queue_cluster_url: String,
+    pub incoming_queue_name: String,
 }
 
 impl Config {
