@@ -87,7 +87,6 @@ async fn run_tools(tool: Tool) -> Result<()> {
 }
 
 async fn run_health_check() -> Result<()> {
-    // Light-weight health check.
     // Just ensures we can load config and connect to the queue.
     let config = Config::try_from_env()?;
     let queue_client = QueueClient::new(&config.queue_cluster_url).await?;
@@ -113,7 +112,7 @@ async fn run_service() -> Result<()> {
     let game_starting_handler = {
         let sender = game_pool_sender.clone();
         move |data: &[u8]| -> Result<()> {
-            // In a real implementation, you would parse the Cap'n Proto GameStarting message
+            // TODO We need to back this with the spec crate
             let message: serde_json::Value = serde_json::from_slice(data)?;
             info!("Processing GameStarting message: {}", message);
 

@@ -13,7 +13,7 @@ up: load-docker
 
 # Stop all services
 down:
-    docker compose down
+    docker compose down -v
 
 # Follow logs of the super-gametable service
 logs:

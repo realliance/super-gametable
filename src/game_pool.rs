@@ -1,8 +1,10 @@
 //! Game pool management for handling multiple concurrent matches
 
 use anyhow::Result;
+use libmahjong_rs::observe::StateFunctionType;
 use serde_json::json;
 use std::collections::HashMap;
+use std::ops::Rem;
 use tokio::sync::mpsc;
 use tokio::task::{spawn_blocking, JoinHandle};
 use tracing::{error, info, warn};
@@ -184,6 +186,8 @@ impl GamePool {
         };
 
         // Autonomous game loop that runs to completion
+        let mut total_rounds = 0;
+
         let final_status = loop {
             match game_match.advance() {
                 Ok(true) => {
@@ -191,6 +195,20 @@ impl GamePool {
                     // Eventually advance will have a lot more to do with network waits
                     // where we probably wont need this sleep to prevent the CPU from
                     // getting pinned.
+                    let observed = game_match.observe_state();
+                    total_rounds += 1;
+                    if total_rounds.rem(10) == 0 {
+                        info!(
+                            "Game {} advanced {} rounds. Current state: {:?}",
+                            match_id, total_rounds, observed
+                        );
+                    }
+                    if let Some(observed) = observed {
+                        if observed.current_state() == StateFunctionType::GameEnd {
+                            info!("Game {} finished.", match_id);
+                            break GameStatus::Finished;
+                        }
+                    }
                     std::thread::sleep(std::time::Duration::from_millis(1));
                 }
                 Ok(false) => {
