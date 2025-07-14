@@ -1,10 +1,11 @@
 use anyhow::Result;
 use libmahjong_rs::{
     ffi::{error::MahjongFFIError, gamestate::GameState},
-    observe::ObservedGameState,
+    observe::{ObservedGameState, StateFunctionType},
     settings::GameSettings,
 };
 use rand::Rng;
+use tracing::info;
 
 use crate::controllers::GameController;
 
@@ -39,17 +40,20 @@ impl GameMatch {
         })
     }
 
-    /// Get the match ID
-    pub fn match_id(&self) -> &str {
-        &self.match_id
-    }
-
     /// Advance the game state
     pub fn advance(&mut self) -> Result<bool> {
         if let Some(current_state) = self.state.take() {
             match current_state.advance() {
                 Ok(new_state) => {
                     self.state = Some(new_state);
+                    let observed = self
+                        .observe_state()
+                        .ok_or(MahjongFFIError::GameStateConsumed)?;
+                    if observed.current_state() == StateFunctionType::GameEnd {
+                        info!("Game {} finished: {:?}", self.match_id, observed);
+                        return Ok(false); // Game is done
+                    }
+
                     Ok(true) // Game continues
                 }
                 Err(MahjongFFIError::GameEnded) => {
@@ -69,10 +73,5 @@ impl GameMatch {
     /// Observe the current game state
     pub fn observe_state(&self) -> Option<ObservedGameState> {
         self.state.as_ref().and_then(|s| s.observe())
-    }
-
-    /// Check if the game is finished (either completed or errored)
-    pub fn is_finished(&self) -> bool {
-        self.state.is_none()
     }
 }

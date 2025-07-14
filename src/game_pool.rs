@@ -21,8 +21,6 @@ pub enum GamePoolMessage {
         match_id: String,
         players: Vec<String>,
     },
-    /// External command to clean up a finished game
-    GameFinished { match_id: String },
     /// Internal notification that a game completed successfully
     GameComplete { match_id: String },
     /// Internal notification that a game ended in an error
@@ -78,15 +76,6 @@ impl GamePool {
                         Err(e) => {
                             error!("Failed to start game {}: {}", match_id, e);
                         }
-                    }
-                }
-                GamePoolMessage::GameFinished { match_id } => {
-                    info!(
-                        "Received external notification to clean up game: {}",
-                        match_id
-                    );
-                    if let Some(handle) = active_games.remove(&match_id) {
-                        handle.abort();
                     }
                 }
                 GamePoolMessage::GameComplete { match_id } => {
@@ -205,7 +194,6 @@ impl GamePool {
                     }
                     if let Some(observed) = observed {
                         if observed.current_state() == StateFunctionType::GameEnd {
-                            info!("Game {} finished.", match_id);
                             break GameStatus::Finished;
                         }
                     }
@@ -228,6 +216,7 @@ impl GamePool {
                 match_id, e
             );
         }
+
         info!("Sync game runner finished for match: {}", match_id);
     }
 

@@ -4,6 +4,7 @@ pub enum GameController {
     ///
     /// Implement network based controller once libmahjong-rs supports
     /// FFI controller registration
+    #[allow(dead_code)]
     External,
 }
 

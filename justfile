@@ -21,7 +21,7 @@ logs:
 
 # Queue a match with the given players
 queue-match *players:
-    docker compose run --rm super-gametable /bin/super-gametable tools queue-match {{players}}
+    docker compose run -it --rm super-gametable /bin/super-gametable tools queue-match {{players}}
 
 # Restart services
 restart: down up
